@@ -68,7 +68,7 @@
         <div class="col col-lg-4 col-md-6 col-sm-12">
             <div class="card">
                 <div class="card-header">
-                    2. Import mutliple files
+                    2. Import multiple files
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">Select a file from your computer to import.</h5>
@@ -83,6 +83,52 @@
                 </div>
                 <div class="card-footer">
                     <pre><code id="uploadMultipleFooter"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    3. Import from a url
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Enter a link to a file to download.</h5>
+                    <form id="uploadFormUrl" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="control-label" for="songUrl">Url</label>
+                            <input id="songUrl" name="songUrl" type="text" class="form-control" placeholder="Url" value="">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="uploadUrl();" class="btn btn-block btn-primary float-right">Upload</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <pre><code id="uploadUrlFooter"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    3. Delete some files
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Enter a link to a file to download.</h5>
+                    <form id="deleteForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="control-label" for="filePath">Path</label>
+                            <input id="filePath" name="filePath" type="text" class="form-control" placeholder="Path" value="">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="deleteResource();" class="btn btn-block btn-danger float-right">Delete</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <pre><code id="deleteFooter"></code></pre>
                 </div>
             </div>
         </div>
@@ -214,38 +260,6 @@
         });
     }
 
-    function navigate(url) {
-        const previous = document.getElementById("path").innerText;
-        const path = previous + url;
-        document.getElementById("path").innerText = path;
-
-        request(api + path, 'GET', null, (response) => {
-            if (response.status === "success") {
-                const navs = document.getElementById("navs");
-                navs.innerHTML = "";
-                const back = document.createElement("button");
-                back.type = "button";
-                back.className = "list-group-item list-group-item-action";
-                back.innerText = " < Go Back";
-                back.addEventListener("click", () => {
-                    document.getElementById("path").innerText = previous;
-                    navigate("");
-                });
-                navs.appendChild(back);
-                response.data.forEach((element) => {
-                    const a = document.createElement("a");
-                    a.href = "#";
-                    a.className = "list-group-item list-group-item-action";
-                    a.addEventListener("click", () => {
-                        navigate("/" + element);
-                    });
-                    a.innerText = element;
-                    navs.appendChild(a);
-                })
-            }
-        });
-    }
-
     function upload() {
         const uploadForm = document.getElementById("uploadForm");
         const fd = new FormData(uploadForm);
@@ -269,6 +283,27 @@
             }
             showAlert(response.status, response.message);
             document.getElementById("uploadMultipleFooter").innerText = JSON.stringify(response.data);
+        });
+    }
+
+    function uploadUrl() {
+        const uploadForm = document.getElementById("uploadFormUrl");
+        const fd = new FormData(uploadForm);
+
+        request(api + "/import", 'POST', fd, (response) => {
+            if (response.status === "success") {
+                ref = response.ref;
+            }
+            showAlert(response.status, response.message);
+            document.getElementById("uploadUrlFooter").innerText = JSON.stringify(response.data);
+        });
+    }
+
+    function deleteResource() {
+        const path = document.getElementById("filePath").value;
+
+        request(api + path, 'DELETE', null, (response) => {
+            showAlert(response.status, response.message);
         });
     }
 

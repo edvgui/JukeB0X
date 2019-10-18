@@ -1,10 +1,10 @@
-const app = require('./app.routes');
-
+const navigation = require('./navigation/navigation.routes');
+const management = require('./management/management.routes');
 
 /**
  * @api {get} /ok Check if the server is up
  * @apiName ok
- * @apiGroup Check
+ * @apiGroup App
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -21,7 +21,8 @@ async function ok(req, res) {
 }
 
 module.exports = function(server) {
-    server.use('/', app);
+    server.use('/', navigation);
+    server.use('/', management);
 
     server.use('/ok', ok);
 

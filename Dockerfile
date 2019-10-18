@@ -5,9 +5,9 @@ FROM node:8.10-alpine
 RUN apk add --no-cache ffmpeg
 
 # set working directory
-WORKDIR /usr/src/meta3
+WORKDIR /usr/src/jukeB0X
 #
-ENV PATH /usr/src/meta3/node_modules/.bin:${PATH}
+ENV PATH /usr/src/jukeB0X/node_modules/.bin:${PATH}
 
 ENV TOKEN_SECRET changeme
 ENV DEBUG users-d

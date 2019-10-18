@@ -1,12 +1,13 @@
-const fs = require('fs');
+const fs = require('fs-extra');
+const crypto = require('crypto');
 
-const constants = require('./../utils/constants');
-const helpers = require('./app.helpers');
+const constants = require('./../../utils/constants');
+const helpers = require('./management.helpers');
 
 /**
  * @api {post} /upload Upload a mp3 file
  * @apiName uploadSong
- * @apiGroup App
+ * @apiGroup Management
  *
  * @apiHeader {String} Content-Type=multipart/form-data
  *
@@ -61,7 +62,7 @@ async function uploadSong(req, res) {
 /**
  * @api {post} /upload/many Upload some mp3 files
  * @apiName uploadSongs
- * @apiGroup App
+ * @apiGroup Management
  *
  * @apiHeader {String} Content-Type=multipart/form-data
  *
@@ -133,16 +134,81 @@ async function uploadSongs(req, res) {
 
 
 /**
- * @api {get} /library Get the artists of the library
- * @apiName artists
- * @apiGroup App
+ * @api {post} /import Import a mp3 file from a url
+ * @apiName importSong
+ * @apiGroup Management
+ *
+ * @apiHeader {String} Content-Type=multipart/form-data
+ *
+ * @apiParam {String} songUrl Music mp3 file url.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 201 Created
+ *     {
+ *       "status":"success",
+ *       "message":"You successfully uploaded your song",
+ *       "data": {
+ *         "title":"Wild Stare",
+ *         "artist":"Giant Rooks",
+ *         "album":"Wild Stare",
+ *         "album_artist":"Giant Rooks",
+ *         "track":"1",
+ *         "date":"2018",
+ *         "genre":"Rock",
+ *         "encoder":"Lavf57.83.100"
+ *       }
+ *     }
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Something went wrong, please make sure you have selected a file."
+ *     }
+ */
+async function importSong(req, res) {
+    const url = req.body.songUrl;
+    if (!url) return res.status(400).json({
+        status: 'error',
+        message: 'Please give a url'
+    });
+
+    const filename = crypto.createHash('md5').update(Date.now() + "").digest('hex') + ".mp3";
+
+    helpers.downloadSong(filename, url).then(() => {
+        helpers.readMetadata(filename).then((data) => {
+            helpers.addNewSong(filename, data.data);
+
+            return res.status(201).json({
+                status: 'success',
+                message: 'You successfully uploaded your song',
+                data: data.data
+            });
+        }).catch((err) => {
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error : ' + err
+            });
+        });
+    }).catch(err => {
+        res.status(400).json({
+            status: 'error',
+            message: "Couldn't import the file : " + url
+        });
+    });
+}
+
+
+/**
+ * @api {delete} /library Delete all the content of the library
+ * @apiName deleteLibrary
+ * @apiGroup Management
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
  *       "status": "success",
- *       "message": "Successfully retrieved the artists of the library",
- *       "data": ["Fall Out Boy","Fallulah","The Score"]
+ *       "message": "The folder has been deleted"
  *     }
  *
  * @apiErrorExample Error-Response:
@@ -152,124 +218,138 @@ async function uploadSongs(req, res) {
  *       "message": "Internal server error"
  *     }
  */
-async function artists(req, res) {
-    fs.readdir(constants.library, (err, files) => {
-        if (err) res.status(500).json({
-            status: 'error',
-            message: 'Internal server error'
-        });
-        else res.status(200).json({
+async function deleteLibrary(req, res) {
+    fs.remove(constants.library).then(() => {
+        res.status(200).json({
             status: 'success',
-            message: 'Successfully retrieved the artists of the library',
-            data: files
+            message: 'The folder has been deleted'
+        })
+    }).catch(err => {
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error : ' + err
         });
     });
 }
 
 
 /**
- * @api {get} /library/:artist Get the albums of the specified artist
- * @apiName albums
- * @apiGroup App
- *
- * @apiParam {String} artist The name of the artist
+ * @api {delete} /library/:artist Delete the artist folder
+ * @apiName deleteArtist
+ * @apiGroup Management
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
  *       "status": "success",
- *       "message": "Successfully retrieved the artists of the library",
- *       "data": ["Dear Future Self (Hands Up)"]
+ *       "message": "The folder has been deleted"
  *     }
  *
  * @apiErrorExample Error-Response:
- *     HTTP/1.1 404 Not Found
+ *     HTTP/1.1 500 Internal server error
  *     {
  *       "status": "error"
- *       "message": "This artist couldn't be found"
+ *       "message": "Internal server error"
  *     }
  */
-async function albums(req, res) {
+async function deleteArtist(req, res) {
     const artist = req.params.artist;
 
-    fs.readdir(constants.library + "/" + artist, (err, files) => {
-        if (err) res.status(404).json({
-            status: 'error',
-            message: "This artist couldn't be found"
-        });
-        else res.status(200).json({
+    fs.remove(constants.library + "/" + artist).then(() => {
+        res.status(200).json({
             status: 'success',
-            message: 'Successfully retrieved the albums of the artist',
-            data: files
+            message: 'The folder has been deleted'
+        })
+    }).catch(err => {
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error : ' + err
         });
     });
 }
 
 
 /**
- * @api {get} /library/:artist/:album Get the tracks of the album
- * @apiName tracks
- * @apiGroup App
- *
- * @apiParam {String} artist The name of the artist
- * @apiParam {String} album The name of the album
+ * @api {delete} /library/:artist/:albul Delete the album folder
+ * @apiName deleteAlbum
+ * @apiGroup Management
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
  *       "status": "success",
- *       "message": "Successfully retrieved the artists of the library",
- *       "data": ["1 - Dear Future Self (Hands Up).mp3","cover.png"]
+ *       "message": "The folder has been deleted"
  *     }
  *
  * @apiErrorExample Error-Response:
- *     HTTP/1.1 404 Not Found
+ *     HTTP/1.1 500 Internal server error
  *     {
  *       "status": "error"
- *       "message": "This album couldn't be found"
+ *       "message": "Internal server error"
  *     }
  */
-async function tracks(req, res) {
+async function deleteAlbum(req, res) {
     const artist = req.params.artist;
     const album = req.params.album;
 
-    fs.readdir(constants.library + "/" + artist + "/" + album, (err, files) => {
-        if (err) res.status(404).json({
-            status: 'error',
-            message: "This album couldn't be found"
-        });
-        else res.status(200).json({
+    fs.remove(constants.library + "/" + artist + "/" + album).then(() => {
+        res.status(200).json({
             status: 'success',
-            message: 'Successfully retrieved the albums of the artist',
-            data: files
+            message: 'The folder has been deleted'
+        })
+    }).catch(err => {
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error : ' + err
         });
     });
 }
 
 
 /**
- * @api {get} /library/:artist/:album/:file Download a specified file
- * @apiName file
- * @apiGroup App
+ * @api {delete} /library/:artist/:album/:file Delete the file
+ * @apiName deleteFile
+ * @apiGroup Management
  *
- * @apiParam {String} artist The name of the artist
- * @apiParam {String} album The name of the album
- * @apiParam {String} file The name of the file
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "status": "success",
+ *       "message": "The file has been deleted"
+ *     }
  *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 500 Internal server error
+ *     {
+ *       "status": "error"
+ *       "message": "Internal server error"
+ *     }
  */
-async function file(req, res) {
+async function deleteFile(req, res) {
     const artist = req.params.artist;
     const album = req.params.album;
     const file = req.params.file;
 
-    return res.download(constants.library + "/" + artist + "/" + album + "/" + file);
+    fs.remove(constants.library + "/" + artist + "/" + album + "/" + file).then(() => {
+        res.status(200).json({
+            status: 'success',
+            message: 'The file has been deleted'
+        })
+    }).catch(err => {
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error : ' + err
+        });
+    });
 }
+
 
 module.exports = {
     uploadSong,
     uploadSongs,
-    artists,
-    albums,
-    tracks,
-    file
+    importSong,
+    deleteLibrary,
+    deleteArtist,
+    deleteAlbum,
+    deleteFile
 };

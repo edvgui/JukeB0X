@@ -1,6 +1,7 @@
-const constants = require('./../utils/constants');
+const constants = require('./../../utils/constants');
 const ffmetadata = require('ffmetadata');
-const fs = require('fs');
+const fs = require('fs-extra');
+const http = require('http');
 
 const newSongs = [];
 let active = false;
@@ -45,39 +46,25 @@ async function consumeNewSongs() {
 }
 
 function manageNewSong(ref, data) {
-    return new Promise((resolve => {
+    return new Promise((async resolve => {
         const pathArtist = constants.library + "/" + data.album_artist;
         const pathAlbum = pathArtist + "/" + data.album;
 
         try {
-            fs.mkdirSync(pathArtist);
+            await fs.remove(pathAlbum + "/cover.png");
         } catch (e) {
             // Do nothing
         }
 
-        try {
-            fs.mkdirSync(pathAlbum);
-        } catch (e) {
-            // Do nothing
-        }
-
-        try {
-            fs.unlinkSync(pathAlbum + "/" + data.track + " - " + data.title);
-        } catch (e) {
-            // Do nothing
-        }
-
-        try {
-            fs.unlinkSync(pathAlbum + "/cover.png");
-        } catch (e) {
-            // Do nothing
-        }
-
-        readMetadataCover(ref, pathAlbum).then(() => {
-            fs.renameSync(constants.uploads + "/" + ref, pathAlbum + "/" + data.track + " - " + data.title + ".mp3");
+        readMetadataCover(ref, pathAlbum).then(async () => {
+            try {
+                await fs.move(constants.uploads + "/" + ref, pathAlbum + "/" + data.track + " - " + data.title + ".mp3");
+            } catch (e) {
+                // Do nothing
+            }
 
             try {
-                fs.unlinkSync(constants.uploads + "/" + ref);
+                fs.remove(constants.uploads + "/" + ref);
             } catch (e) {
                 // Do nothing
             }
@@ -87,7 +74,29 @@ function manageNewSong(ref, data) {
     }));
 }
 
+function downloadSong(filename, url) {
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(constants.uploads + "/" + filename);
+
+        http.get(url, response => {
+            response.pipe(file);
+            file.on('finish', () => {
+                if (response.statusCode === 200)
+                    resolve();
+                else {
+                    fs.remove(constants.uploads + "/" + filename);
+                    reject("Couldn't find that resource");
+                }
+            });
+        }).on('error', (err) => {
+            fs.remove(constants.uploads + "/" + filename);
+            reject(err);
+        });
+    });
+}
+
 module.exports = {
     readMetadata,
-    addNewSong
+    addNewSong,
+    downloadSong
 };

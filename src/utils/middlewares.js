@@ -44,6 +44,8 @@ const uploadSongs = multer({
     }
 }).array("songFiles", 20);
 
+const formUpload = multer().none();
+
 function mySongUpload(req, res, next) {
     uploadSong(req, res, function (err) {
         req.error = err;
@@ -58,7 +60,15 @@ function mySongsUpload(req, res, next) {
     })
 }
 
+function myFormUpload(req, res, next) {
+    formUpload(req, res, function (err) {
+        req.error = err;
+        next();
+    });
+}
+
 module.exports = {
     mySongUpload,
-    mySongsUpload
+    mySongsUpload,
+    myFormUpload
 };

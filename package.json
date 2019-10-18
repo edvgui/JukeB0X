@@ -1,0 +1,31 @@
+{
+	"name": "JukeB0X",
+	"description": "MP3 library API",
+	"license": "MIT",
+	"repository": {
+		"type": "Public GitHub repository",
+		"url": "https://github.com/edvgui/JukeB0X"
+	},
+	"apidoc": {
+		"title": "JukeB0X Documentation",
+		"url" : ""
+	},
+	"scripts": {
+		"start": "gulp --gulpfile gulpfile.js",
+		"doc": "apidoc -i src/ -o docs/"
+	},
+	"dependencies": {
+		"debug": "4.1.1",
+		"apidoc": "0.17.7",
+
+		"express": "4.17.1",
+		"body-parser": "1.19.0",
+		"morgan": "1.9.1",
+
+		"multer": "^1.4.2",
+		"ffmetadata": "^1.5.0",
+
+		"gulp": "4.0.2",
+		"gulp-nodemon": "2.4.2"
+	}
+}

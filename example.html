@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>JukeB0X</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">JukeB0X</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" target="_blank" href="https://edvgui.github.io/JukeB0X">API Documentation</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+
+    <div class="page-header">
+        <h1>JukeB0X : Small example of use.</h1>
+    </div>
+
+    <div class="row">
+        <div id="alertBox" class="col">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    1. Import a file
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Select a file from your computer to import.</h5>
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input id="songFile" name="songFile" type="file" accept=".mp3">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="upload();" class="btn btn-block btn-primary float-right">Upload</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <pre><code id="uploadFooter"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    2. Import mutliple files
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Select a file from your computer to import.</h5>
+                    <form id="uploadFormMultiple" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input id="songFiles" name="songFiles" type="file" accept=".mp3" multiple>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="uploadMultiple();" class="btn btn-block btn-primary float-right">Upload</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <pre><code id="uploadMultipleFooter"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    3. Explore the library
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Navigate across the library.</h5>
+                    <h6 id="path"></h6>
+                    <div class="list-group" id="navs">
+                        <a href="#" class="list-group-item list-group-item-action" onclick="library();">library</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script>
+    const api = "http://localhost:3001";
+    let ref = "";
+
+    function request(url, method, data, callback) {
+        const req = new XMLHttpRequest();
+
+        req.onreadystatechange = function (event) {
+            // XMLHttpRequest.DONE === 4
+            if (this.readyState === XMLHttpRequest.DONE) {
+                callback(JSON.parse(this.response));
+            }
+        };
+
+        req.open(method, url, true);
+        req.send(data);
+    }
+
+    function library() {
+        const path = document.getElementById("path");
+        path.innerText = "/library";
+
+        request(api + path.innerText, 'GET', null, response => {
+            if (response.status === "success") {
+                const navs = document.getElementById("navs");
+                navs.innerHTML = "";
+                const refresh = document.createElement("button");
+                refresh.type = "button";
+                refresh.className = "list-group-item list-group-item-action";
+                refresh.innerText = " Refresh";
+                refresh.addEventListener("click", () => {
+                    library();
+                });
+                navs.appendChild(refresh);
+                response.data.forEach((element) => {
+                    const a = document.createElement("a");
+                    a.href = "#";
+                    a.className = "list-group-item list-group-item-action";
+                    a.addEventListener("click", () => {
+                        navigateArtist(element);
+                    });
+                    a.innerText = element;
+                    navs.appendChild(a);
+                })
+            }
+        });
+    }
+
+    function navigateArtist(artist) {
+        const path = document.getElementById("path");
+        path.innerText = "/library/" + artist;
+
+        request(api + path.innerText, 'GET', null, response => {
+            if (response.status === "success") {
+                const navs = document.getElementById("navs");
+                navs.innerHTML = "";
+                const back = document.createElement("button");
+                back.type = "button";
+                back.className = "list-group-item list-group-item-action";
+                back.innerText = " < Go Back";
+                back.addEventListener("click", () => {
+                    library();
+                });
+                navs.appendChild(back);
+                response.data.forEach((element) => {
+                    const a = document.createElement("a");
+                    a.href = "#";
+                    a.className = "list-group-item list-group-item-action";
+                    a.addEventListener("click", () => {
+                        navigateAlbum(artist, element);
+                    });
+                    a.innerText = element;
+                    navs.appendChild(a);
+                })
+            }
+        });
+    }
+
+    function navigateAlbum(artist, album) {
+        const path = document.getElementById("path");
+        path.innerText = "/library/" + artist + "/" + album;
+
+        request(api + path.innerText, 'GET', null, response => {
+            if (response.status === "success") {
+                const navs = document.getElementById("navs");
+                navs.innerHTML = "";
+                const back = document.createElement("button");
+                back.type = "button";
+                back.className = "list-group-item list-group-item-action";
+                back.innerText = " < Go Back";
+                back.addEventListener("click", () => {
+                    navigateArtist(artist);
+                });
+                navs.appendChild(back);
+                response.data.forEach((element) => {
+                    const a = document.createElement("a");
+                    a.href = api + path.innerText + "/" + element;
+                    a.className = "list-group-item list-group-item-action";
+                    a.innerText = element;
+                    a.download;
+                    navs.appendChild(a);
+                })
+            }
+        });
+    }
+
+    function navigate(url) {
+        const previous = document.getElementById("path").innerText;
+        const path = previous + url;
+        document.getElementById("path").innerText = path;
+
+        request(api + path, 'GET', null, (response) => {
+            if (response.status === "success") {
+                const navs = document.getElementById("navs");
+                navs.innerHTML = "";
+                const back = document.createElement("button");
+                back.type = "button";
+                back.className = "list-group-item list-group-item-action";
+                back.innerText = " < Go Back";
+                back.addEventListener("click", () => {
+                    document.getElementById("path").innerText = previous;
+                    navigate("");
+                });
+                navs.appendChild(back);
+                response.data.forEach((element) => {
+                    const a = document.createElement("a");
+                    a.href = "#";
+                    a.className = "list-group-item list-group-item-action";
+                    a.addEventListener("click", () => {
+                        navigate("/" + element);
+                    });
+                    a.innerText = element;
+                    navs.appendChild(a);
+                })
+            }
+        });
+    }
+
+    function upload() {
+        const uploadForm = document.getElementById("uploadForm");
+        const fd = new FormData(uploadForm);
+
+        request(api + "/upload", 'POST', fd, (response) => {
+            if (response.status === "success") {
+                ref = response.ref;
+            }
+            showAlert(response.status, response.message);
+            document.getElementById("uploadFooter").innerText = JSON.stringify(response.data);
+        });
+    }
+
+    function uploadMultiple() {
+        const uploadForm = document.getElementById("uploadFormMultiple");
+        const fd = new FormData(uploadForm);
+
+        request(api + "/upload/many", 'POST', fd, (response) => {
+            if (response.status === "success") {
+                ref = response.ref;
+            }
+            showAlert(response.status, response.message);
+            document.getElementById("uploadMultipleFooter").innerText = JSON.stringify(response.data);
+        });
+    }
+
+    function showAlert(status, message) {
+        const alertBox = document.getElementById("alertBox");
+        alertBox.innerText = "";
+        const div = document.createElement("div");
+        div.className = "alert alert-admissible";
+        if (status === "success") {
+            div.className += " alert-success";
+        } else if (status === "error") {
+            div.className += " alert-danger";
+        }
+
+        div.innerHTML += "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\">&times;</a>";
+        div.innerHTML += "<strong>" + status.toUpperCase() + "</strong> ";
+        div.innerHTML += message;
+
+        alertBox.appendChild(div);
+    }
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 JukeB0X is a simple REST API that allows to upload mp3 files and retrieve them.  This solution is presented under a docker
 container shape to make easier the deployment of the app.
 
-You can find the detailed API [here](https://edvgui.github.io/JukeBOX).
+You can find the detailed API [here](https://edvgui.github.io/JukeB0X).
 
 ## Installation
 To create the docker container image, in the project folder, simply run :

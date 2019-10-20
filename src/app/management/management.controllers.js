@@ -72,7 +72,7 @@ async function uploadSong(req, res) {
  *     HTTP/1.1 201 Created
  *     {
  *       "status": "success",
- *       "message": "You successfully uploaded your song",
+ *       "message": "You successfully uploaded your songs",
  *       "data": [
  *           {
  *               "title": "Hunger",
@@ -126,7 +126,7 @@ async function uploadSongs(req, res) {
 
         return res.status(201).json({
             status: 'success',
-            message: 'You successfully uploaded your song',
+            message: 'You successfully uploaded your songs',
             data: list
         });
     }
@@ -146,7 +146,7 @@ async function uploadSongs(req, res) {
  *     HTTP/1.1 201 Created
  *     {
  *       "status":"success",
- *       "message":"You successfully uploaded your song",
+ *       "message":"You successfully imported your song",
  *       "data": {
  *         "title":"Wild Stare",
  *         "artist":"Giant Rooks",
@@ -181,7 +181,7 @@ async function importSong(req, res) {
 
             return res.status(201).json({
                 status: 'success',
-                message: 'You successfully uploaded your song',
+                message: 'You successfully imported your song',
                 data: data.data
             });
         }).catch((err) => {
@@ -270,7 +270,7 @@ async function deleteArtist(req, res) {
 
 
 /**
- * @api {delete} /library/:artist/:albul Delete the album folder
+ * @api {delete} /library/:artist/:album Delete the album folder
  * @apiName deleteAlbum
  * @apiGroup Management
  *

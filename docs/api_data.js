@@ -20,7 +20,7 @@ define({ "api": [
   },
   {
     "type": "delete",
-    "url": "/library/:artist/:albul",
+    "url": "/library/:artist/:album",
     "title": "Delete the album folder",
     "name": "deleteAlbum",
     "group": "Management",
@@ -167,7 +167,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 201 Created\n{\n  \"status\":\"success\",\n  \"message\":\"You successfully uploaded your song\",\n  \"data\": {\n    \"title\":\"Wild Stare\",\n    \"artist\":\"Giant Rooks\",\n    \"album\":\"Wild Stare\",\n    \"album_artist\":\"Giant Rooks\",\n    \"track\":\"1\",\n    \"date\":\"2018\",\n    \"genre\":\"Rock\",\n    \"encoder\":\"Lavf57.83.100\"\n  }\n}",
+          "content": "HTTP/1.1 201 Created\n{\n  \"status\":\"success\",\n  \"message\":\"You successfully imported your song\",\n  \"data\": {\n    \"title\":\"Wild Stare\",\n    \"artist\":\"Giant Rooks\",\n    \"album\":\"Wild Stare\",\n    \"album_artist\":\"Giant Rooks\",\n    \"track\":\"1\",\n    \"date\":\"2018\",\n    \"genre\":\"Rock\",\n    \"encoder\":\"Lavf57.83.100\"\n  }\n}",
           "type": "json"
         }
       ]
@@ -277,7 +277,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "  HTTP/1.1 201 Created\n  {\n    \"status\": \"success\",\n    \"message\": \"You successfully uploaded your song\",\n    \"data\": [\n        {\n            \"title\": \"Hunger\",\n            \"artist\": \"The Score\",\n            \"album\": \"Stay\",\n            \"album_artist\": \"The Score\",\n            \"track\": \"5\",\n            \"date\": \"2019\",\n            \"genre\": \"Alternative\",\n            \"encoder\": \"Lavf57.83.100\"\n        },\n        {\n            \"title\": \"Run Like A Rebel\",\n            \"artist\": \"The Score\",\n            \"album\": \"Stay\",\n            \"album_artist\": \"The Score\",\n            \"track\": \"4\",\n            \"date\": \"2019\",\n            \"genre\": \"Alternative\",\n            \"encoder\": \"Lavf57.83.100\"\n        }\n    ]\n}",
+          "content": "  HTTP/1.1 201 Created\n  {\n    \"status\": \"success\",\n    \"message\": \"You successfully uploaded your songs\",\n    \"data\": [\n        {\n            \"title\": \"Hunger\",\n            \"artist\": \"The Score\",\n            \"album\": \"Stay\",\n            \"album_artist\": \"The Score\",\n            \"track\": \"5\",\n            \"date\": \"2019\",\n            \"genre\": \"Alternative\",\n            \"encoder\": \"Lavf57.83.100\"\n        },\n        {\n            \"title\": \"Run Like A Rebel\",\n            \"artist\": \"The Score\",\n            \"album\": \"Stay\",\n            \"album_artist\": \"The Score\",\n            \"track\": \"4\",\n            \"date\": \"2019\",\n            \"genre\": \"Alternative\",\n            \"encoder\": \"Lavf57.83.100\"\n        }\n    ]\n}",
           "type": "json"
         }
       ]
